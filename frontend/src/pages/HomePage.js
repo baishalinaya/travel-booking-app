@@ -27,6 +27,7 @@ const HomePage = () => {
 
   return (
     <div>
+      
       <Navbar />
       <div
         className="homepage"
