@@ -63,6 +63,7 @@ function HomePage() {
           </div>
         </div>
       </div>
+=======
       <Container>
           <AnimationOverlay>
         <IntroContainer>
