@@ -27,8 +27,6 @@ function HomePage() {
 
   return (
     <div>
-<<<<<<< HEAD
-      
       <Navbar />
       <div
         className="homepage"
@@ -65,7 +63,6 @@ function HomePage() {
           </div>
         </div>
       </div>
-=======
       <Container>
           <AnimationOverlay>
         <IntroContainer>
@@ -194,7 +191,6 @@ function HomePage() {
       </Container>
       
       <Footer/>
->>>>>>> 5e237c272da3129a3d20756116f4c9f90c6c1c75
     </div>
   );
 }
