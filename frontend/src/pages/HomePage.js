@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@apollo/client";
 import styled from "styled-components";
+import { GET_PACKAGES } from "../graphql/queries";
 import image from "../assests/img1.avif";
 import img2 from "../assests/img2.jpg";
 import img3 from "../assests/img3.webp";
@@ -8,16 +10,25 @@ import img4 from "../assests/img4.webp";
 import banner from "../assests/banner1.webp";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
+import Empty from "./Empty";
+const UNSPLASH_ACCESS_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 function HomePage() {
   const navigate = useNavigate();
   const contactSectionRef = useRef(null);
+  const { data, loading, error } = useQuery(GET_PACKAGES);
+  const [images, setImages] = useState({});
   const handleStartBooking = () => navigate("/booking");
   const handleTravelPackageBrowsing = () => navigate("/booking");
   const handleSecurity = () => navigate("/secure");
+  const showmore =()=>navigate("/packages");
   const handleUpdates = () => navigate("/update");
+  const packages=data?.getPackages ||[];
   const handleScrollToContact = () =>
     contactSectionRef.current.scrollIntoView({ behavior: "smooth" });
+  useEffect(() => {
+    window.scrollTo(0, 0); // Scrolls to the top when the component is mounted
+  }, []);
 
   useEffect(() => {
     if (window.location.hash === "#contact") {
@@ -25,47 +36,42 @@ function HomePage() {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (!packages.length) return; // Only fetch if packages are available
+      const newImages = {};
+
+      for (const pkg of packages) {
+        if (!images[pkg.destination]){
+          try {
+            const response = await fetch(
+              `https://api.unsplash.com/search/photos?query=${pkg.destination}&per_page=1&client_id=${UNSPLASH_ACCESS_KEY}`
+            );
+            const result = await response.json();
+            newImages[pkg.destination] =
+              result.results[0]?.urls?.regular || banner; // Fallback image
+          } catch (err) {
+            console.error(`Error fetching image for ${pkg.destination}:`, err);
+            newImages[pkg.destination] = banner; // Default fallback image
+          }
+        }
+      }
+      setImages((prev) => ({ ...prev, ...newImages }));
+    };
+
+    fetchImages();
+  }, [packages]);
+  const handleBookNow = (pkg) => {
+    navigate("/confirm-booking", { state: { packageDetails: pkg } }); 
+  };
+    // Show loading or error messages
+   if (loading) return;
+   if (error) return <Empty/>;
+ 
   return (
     <div>
-      <Navbar />
-      <div
-        className="homepage"
-        style={{
-          height: '100vh',
-          background: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${herobg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          transition: 'background-image 1s ease-in-out',
-        }}
-      >
-        <h1 className="heading">Welcome to <span>Tripify</span> ✈️
-        </h1>
-        <div className="card-container">
-          <div
-            className="card c1"
-            style={{
-              backgroundImage: `url(${packagesImage})`,
-            }}
-            onClick={handleAllPackages}
-          >
-            <h2>Explore Packages</h2>
-            <p>Browse through our wide range of travel packages and make your trip memorable!</p>
-          </div>
-          <div
-            className="card c2"
-            style={{
-              backgroundImage: `url(${cartImage})`,
-            }}
-            onClick={handleViewBookingHistory}
-          >
-            <h2>Your Bookings</h2>
-            <p>View the travel packages you have booked.</p>
-          </div>
-        </div>
-      </div>
-=======
       <Container>
-          <AnimationOverlay>
+       <AnimationOverlay>
         <IntroContainer>
       <span className="title">Tripify</span>
       <span className="airplane">&#9992;</span>
@@ -92,7 +98,7 @@ function HomePage() {
                 hassle-free experience that allows you to focus on what truly
                 matters – enjoying the journey and the destination. Let us take
                 care of the details while you embrace the joy of exploring the
-                world.
+                world. 
                 </ExtendedDescription>
                 <ContactLink onClick={handleScrollToContact}>Get in touch</ContactLink>
               </TextSection>
@@ -140,8 +146,31 @@ function HomePage() {
                 </Card>
               </CardContainer>
             </PackagesSection>
+        {/* Latest Travel Packages Section */}
+        <LatestPackagesSection>
+          <SectionHeading>Latest Travel Packages</SectionHeading>
+          <PackageCardContainer>
+            {data.getPackages.slice(-3).map((pkg) => (
+              <Card key={pkg.id} className="cards">
+                <PackageImage
+                  src={images[pkg.destination] || banner} // Fallback image if not loaded
+                  alt={pkg.destination}
+                />
+                <CardContent className="box">
+                <CardTitle>{pkg.title}</CardTitle>
+                 <CardDescription>{pkg.description}</CardDescription>
+                  <CardDescription id="price"><strike>₹{pkg.price+(pkg.price*0.50)}</strike> ₹{pkg.price} </CardDescription>
+                  <CardDescription>{pkg.duration} itenary</CardDescription>
+                  <BookButton onClick={() => handleBookNow(pkg)}>Book Now</BookButton>
+                </CardContent>
+              </Card>
+            ))}
+            <Card onClick={showmore}><CardContent><p id="explore">Explore More ➤</p></CardContent></Card>
+          </PackageCardContainer>
+        </LatestPackagesSection>
 
             {/* Contact Section */}
+            
             <ContactSection ref={contactSectionRef}>
             <FormWrapper>
               <ContactHeading>Get in touch</ContactHeading>
@@ -174,7 +203,7 @@ function HomePage() {
               </Form>
             </FormWrapper>
             <ContactInfo>
-              <InfoHeading>Get in touch</InfoHeading>
+              <InfoHeading>Contact us</InfoHeading>
               <InfoItem>📧 support@tripify.com</InfoItem>
               <InfoItem>📍 123 Travel Lane, Wanderlust City</InfoItem>
               <InfoHours>
@@ -198,6 +227,53 @@ function HomePage() {
 
 export default HomePage;
 // Styled Components (unchanged except for `AnimationContainer`)
+const LatestPackagesSection = styled.div`
+  padding: 10px 20px;
+  text-align: center;
+`;
+const PackageCardContainer=styled.div`
+display:flex;
+flex-direction:row;
+gap:20px;
+flex-wrap:wrap;
+#price{
+color:rgb(0, 212, 35);}
+p{
+padding:0px;
+margin:2px;}
+#price strike{
+color:black;}
+.cards{
+display:flex;
+flex-direction:column;}
+.cards .box{
+display:flex;
+flex-direction:column;
+justify-content:space-between;}
+`;
+const PackageImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+`;
+const SectionHeading = styled.h2`
+  font-size: 2rem;
+  color:teal;
+  margin-bottom: 30px;
+`;
+const BookButton = styled.button`
+  background: teal;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background: darkcyan;
+    color: yellow;
+  }
+`;
 
 const AnimationOverlay = styled.div`
   position: fixed;
@@ -206,7 +282,7 @@ const AnimationOverlay = styled.div`
   z-index: 11; /* Ensures it stays above other components */
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, teal, rgb(50, 169, 199));
+  background: linear-gradient(to bottom,teal, rgb(50, 169, 199));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -280,7 +356,7 @@ const FormWrapper = styled.div`
 `;
 
 const ContactHeading = styled.h3`
-  color: teal;
+  color:teal;
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 10px;
@@ -474,6 +550,10 @@ const MainContent = styled.div`
   align-items: center;
   width: 90%;
   max-width: 1200px;
+  background:teal;
+  padding:60px;
+  border-radius:30px;
+  box-shadow:2px 2px 15px rgba(0,0,0,0.3);
   margin-top: 50px;
 
   @media (max-width: 768px) {
@@ -493,7 +573,7 @@ const TextSection = styled.div`
 `;
 
 const SmallHeading = styled.h3`
-  color: teal;
+  color: white;
   font-size: 1rem;
   font-weight: bold;
   margin-bottom: 10px;
@@ -502,13 +582,13 @@ const SmallHeading = styled.h3`
 const ContentHeading = styled.h1`
   font-size: 2.5rem;
   font-weight: bold;
-  color:rgb(26, 79, 92);
+  color:rgb(198, 244, 255);
   margin-bottom: 20px;
 `;
 
 const ExtendedDescription = styled.p`
   font-size: 20px;
-  color: #495057;
+  color:rgb(199, 200, 202);
   line-height: 1.8;
   margin-bottom: 30px;
 `;
@@ -516,7 +596,7 @@ const ExtendedDescription = styled.p`
 const ContactLink = styled.a`
   font-size: 1rem;
   font-weight: bold;
-  color:teal;
+  color:yellow;
   text-decoration: none;
 
   &:hover {
@@ -543,6 +623,13 @@ const StyledImage = styled.img`
 const PackagesSection = styled.div`
   padding: 60px 20px;
   text-align: center;
+  div div{
+  background:white;
+  }
+  div h3{
+  color:teal;}
+  div p{
+  color:rgba(48, 72, 70, 0.9);}
 `;
 
 const Heading = styled.h3`
@@ -594,6 +681,13 @@ const CardImage = styled.img`
 
 const CardContent = styled.div`
   padding: 20px;
+  #explore{
+  text-align:center;
+  position:relative;
+  color:white;
+  font-weight:600;
+  top:210px;
+  }
 `;
 
 const CardTitle = styled.h3`
