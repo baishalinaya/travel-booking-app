@@ -13,7 +13,7 @@ const BookingHistory = () => {
   const [showLoadingScreen, setShowLoadingScreen] = useState(true); // State to control the loading screen visibility
   const { loading, error, data, refetch } = useQuery(GET_BOOKING_HISTORY, {
     variables: { userId },
-    skip: !userId, // Skip query execution until userId is available
+    skip: !userId,
   });
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const BookingHistory = () => {
   }
 
   const bookingHistory = data?.getBookingHistory || [];
-
+ console.log(bookingHistory[0]);
   return (
     <div>
       <Navbar />
@@ -81,7 +81,7 @@ const BookingHistory = () => {
          <Link to="/packages">
           <p id="start">Start Booking!</p>
          </Link></div>) : (
-          <ul>
+          <ul className='bookings-list'>
             {bookingHistory.map((booking) => (
               <li key={booking.id} className="booking-card">
                 <h2>{booking.package.title}</h2>
@@ -91,6 +91,7 @@ const BookingHistory = () => {
                 <p>
                   <strong>Booking Date:</strong> {booking.date}
                 </p>
+                <p>₹{booking.package.price}</p>
                 <p id="status">
                   {booking.status + (booking.status === 'Confirmed' ? ' ✅' : ' ❌')}
                 </p>

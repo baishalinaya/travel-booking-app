@@ -1,20 +1,22 @@
 // src/pages/PackagesPage.js
 
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { GET_PACKAGES } from '../graphql/queries';
-import { BOOK_PACKAGE } from '../graphql/mutation';
+import { useNavigate } from "react-router-dom";
 import styled from 'styled-components';
 import Navbar from './NavBar';
 import './PackagesPage.css';
 import LoadingScreen from './LoadingScreen';
-import Footer from './Footer';const UNSPLASH_ACCESS_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
+import Footer from './Footer';
+const UNSPLASH_ACCESS_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 const PackagesPage = () => {
-  const { loading, error, data, refetch } = useQuery(GET_PACKAGES);
-  const [bookPackage] = useMutation(BOOK_PACKAGE);
+  const { loading, error, data } = useQuery(GET_PACKAGES);
   const [images, setImages] = useState({});
   const [showContent, setShowContent] = useState(false);
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const preloadImages = async () => {
       if (data?.getPackages) {
@@ -57,34 +59,9 @@ const PackagesPage = () => {
     }
   };
 
-  const handleBookPackage = async (packageId) => {
-    const token = localStorage.getItem('auth-token');
-    const userId = localStorage.getItem('user-id');
-
-    if (!token || !userId) {
-      alert('Please log in to book packages.');
-      window.location.href = '/auth';
-      return;
-    }
-
-    try {
-      const date = new Date().toLocaleDateString();
-      const response = await bookPackage({
-        variables: { packageId, userId, date },
-      });
-
-      if (response?.data?.bookPackage) {
-        alert(`Booking successful for "${response.data.bookPackage.package.title}"!`);
-        refetch();
-      } else {
-        alert('Failed to book the package. Please try again.');
-      }
-    } catch (err) {
-      console.error('Error booking package:', err);
-      alert('Error while booking the package.');
-    }
+  const handleBookNow = (pkg) => {
+    navigate("/confirm-booking", { state: { packageDetails: pkg } }); 
   };
-
   if (loading || !showContent)
     return (
       <div>
@@ -128,14 +105,16 @@ const PackagesPage = () => {
                   <Price>
                     <OldPrice>₹{pkg.price + pkg.price * 0.5}</OldPrice> ₹{pkg.price}
                   </Price>
-                  <BookButton onClick={() => handleBookPackage(pkg.id)}>Book Now</BookButton>
+                  {(pkg.availability===0)?<BookButton disabled>Unavailable</BookButton>:
+                  <BookButton onClick={() => handleBookNow(pkg)}>Book Now</BookButton>}
                 </CardContent>
               </PackageCard>
             ))}
           </PackagesContainer>
         </Content>
-        <Footer />
       </PageContainer>
+      
+      <Footer />
     </div>
   );
 };
@@ -163,8 +142,8 @@ const PackagesContainer = styled.div`
 `;
 const PackageCard = styled.div`
   background: linear-gradient(-90deg,
-    rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.28),
-    rgba(0, 0, 0, 0.93) 
+    rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.47),
+    rgba(0, 0, 0, 0.79) 
   ), url(${(props) => props.backgroundimage});
   background-size: cover;
   background-position: center;
@@ -235,19 +214,28 @@ const OldPrice = styled.span`
 `;
 
 const BookButton = styled.button`
-  background:teal;
+  background: teal;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
   cursor: pointer;
-  float:right;
+  float: right;
   transition: background 0.3s;
 
+  /* Disabled state */
+  &:disabled {
+    background: rgb(1, 76, 68);
+    color:grey;
+    cursor: not-allowed;
+  }
+
+  /* Hover state */
   &:hover {
-    background:rgb(1, 76, 68);
-    color:yellow;
+    background: rgb(1, 76, 68);
+    color: yellow;
   }
 `;
+
 

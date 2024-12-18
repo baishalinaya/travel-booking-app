@@ -7,6 +7,7 @@ import NavBar from './NavBar';
 import {jwtDecode} from 'jwt-decode';
 import Footer from './Footer';
 import bgImage from '../assests/login.gif'; 
+import { decode } from 'punycode';
 
 const AuthPage = () => {
   const [form, setForm] = useState({ username: '', email: '', password: '', role: 'user' });
@@ -15,6 +16,7 @@ const AuthPage = () => {
   const [signUp] = useMutation(SIGN_UP);
   const [login] = useMutation(LOGIN);
   const navigate = useNavigate();
+  const handlelogo=()=>navigate('/');
 
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,12 +35,12 @@ const AuthPage = () => {
         const token = data?.loginUser;
         if (token) {
           const decoded = jwtDecode(token);
-          console.log(decoded.username);
+          console.log(decoded.role);
           localStorage.setItem('auth-token', token);
           localStorage.setItem('user-id', decoded.id);
           localStorage.setItem('email', form.email);
           localStorage.setItem('username',decoded.username);
-         
+         localStorage.setItem('role',decoded.role);
           navigate('/');
         } else {
           throw new Error('Invalid login response');
@@ -94,6 +96,8 @@ const AuthPage = () => {
         >
           {isSignUp ? 'Already registered? Login!' : "Don't have an account? Register now!"}
         </SwitchButton>
+        
+      <Logo onClick={handlelogo}>Tripify</Logo>
       </AuthForm>
       {authError && <ErrorText>{authError}</ErrorText>}
     </AuthContainer>
@@ -105,6 +109,15 @@ const AuthPage = () => {
 export default AuthPage;
 
 // Styled Components
+const Logo=styled.p`
+color:teal;
+font-family:lemon;
+float:right;
+font-weight:700;
+padding-left:0px;
+margin:0px;
+cursor:pointer;
+`;
 const AuthContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -137,6 +150,7 @@ const AuthContainer = styled.div`
 const AuthForm = styled.form`
   background-color: #ffffff;
   padding: 40px;
+  padding-bottom:20px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   max-width: 400px;
@@ -202,6 +216,9 @@ const SwitchButton = styled.button`
   font-size: 1rem;
   text-decoration: underline;
   border: none;
+  padding-right:0px;
+  position:relative;
+  right:-15px;
   cursor: pointer;
 `;
 

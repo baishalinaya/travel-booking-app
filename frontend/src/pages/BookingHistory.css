@@ -1,21 +1,26 @@
 .booking-history {
     text-align: center;
-    background: url('../assests/herobg.avif');
+    background: #eff6ff;
     background-size: cover;
     background-position: center;
     padding: 20px;
-    padding-top: 70px;
+    padding-top: 80px;
     min-height: 100vh; /* Ensure the background covers the entire viewport */
   }
   
   .booking-history h1 {
-    color: rgb(255, 255, 255);
-    font-size: 50px;
+    color: teal;
+    font-size: 40px;
     margin-bottom: 30px;
   }
-  
+ .bookings-list{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+ }
   .booking-card {
     background: white;
+    width:400px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 30px;
@@ -33,14 +38,14 @@
   }
   
   .booking-card h2 {
-    font-size: 30px;
+    font-size: 20px;
     color: teal;
     margin-bottom: 20px;
     font-family: "Arial";
   }
   
   .booking-card p {
-    font-size: 16px;
+    font-size: 15px;
     color: #444;
     margin: 5px 0;
   }

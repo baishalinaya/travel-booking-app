@@ -23,6 +23,36 @@ export const ADD_TRAVEL_PACKAGE = gql`
     addTravelPackage(title: $title, description: $description, price: $price, duration: $duration, destination: $destination, availability: $availability) {
       id
       title
+      destination
+    }
+  }
+`;
+export const UPDATE_PACKAGE = gql`
+  mutation UpdateTravelPackage(
+    $id: ID!
+    $title: String!
+    $description: String!
+    $price: Float!
+    $duration: String!
+    $destination: String!
+    $availability: Int!
+  ) {
+    updateTravelPackage(
+      id: $id
+      title: $title
+      description: $description
+      price: $price
+      duration: $duration
+      destination: $destination
+      availability: $availability
+    ) {
+      id
+      title
+      description
+      price
+      duration
+      destination
+      availability
     }
   }
 `;

@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const GET_PACKAGES = gql`
-  query {
+  query{
     getPackages {
       id
       title
@@ -21,6 +21,8 @@ export const GET_BOOKING_HISTORY = gql`
       package {
         title
         destination
+        price
+        duration
       }
       date
       status
