@@ -29,6 +29,7 @@
     display: flex;
     padding-right: 75px;
     font-family: Arial,sans-serif;
+    font-weight: 800;
     gap: 20px;
   }
 .logout-button{
@@ -36,10 +37,10 @@
     border: none;
     color: white;
     font-size: 18px;
+    font-weight: 800;
 }
 .logout-button:hover{
-    color:yellow;
-    cursor: pointer;
+   cursor: pointer;
 }
   
   .nav-link{
@@ -69,7 +70,7 @@
   float: right;
   height: 30px;
   right: -37px;
-  top:-5px;
+  top:-1px;
   position: absolute;
   
 }
@@ -92,9 +93,10 @@
   padding: 10px;
   display: block;
   color: #333;
+  font-weight: 300;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.6s;
 }
 
 .dropdown-item:hover {
@@ -115,5 +117,5 @@
 
 .logout-button:hover {
   background-color:  #f0f8ff;
-  color:black;
+  color:#00646b;
 }

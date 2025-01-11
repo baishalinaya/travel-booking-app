@@ -12,10 +12,69 @@ import Footer from './Footer';
 const UNSPLASH_ACCESS_KEY = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
 const PackagesPage = () => {
-  const { loading, error, data } = useQuery(GET_PACKAGES);
+  const { loading, error, data, refetch } = useQuery(GET_PACKAGES);
   const [images, setImages] = useState({});
   const [showContent, setShowContent] = useState(false);
+  const [filter, setFilter] = useState({
+    budget: 'all',
+    date: 'all',
+  });
+  const [sort, setSort] = useState('availabilityDesc');// Sorting by price ascending
+  const [filteredPackages, setFilteredPackages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const filterPackages = (packages) => {
+    let filtered = [...packages];
+  
+    if (filter.budget !== 'all') {
+      const maxBudget = parseInt(filter.budget, 10); // Convert slider value to number
+  
+      filtered = filtered.filter(pkg => pkg.price <= maxBudget); // Filter based on budget
+    }
+  
+    // Implement filtering by date (as before)
+    if (filter.date !== 'all') {
+      const currentDate = new Date();
+      filtered = filtered.filter(pkg => {
+        const pkgDate = new Date(pkg.date); // Assume `pkg.date` exists
+        if (filter.date === 'upcoming') {
+          return pkgDate > currentDate;
+        } else if (filter.date === 'past') {
+          return pkgDate < currentDate;
+        }
+        return true;
+      });
+    }
+    if (searchQuery) {
+      filtered = filtered.filter(pkg => 
+        pkg.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        pkg.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pkg.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+  
+    return filtered;
+  };
+  
+  const sortPackages = (packages) => {
+    const sorted = [...packages];
+    if (sort === 'priceAsc') {
+      return sorted.sort((a, b) => a.price - b.price); // Sort by price (low to high)
+    } else if (sort === 'priceDesc') {
+      return sorted.sort((a, b) => b.price - a.price); // Sort by price (high to low)
+    }
+    
+    if (sort === 'availabilityAsc') {
+      return sorted.sort((a, b) => a.availability - b.availability);
+    } else if (sort === 'availabilityDesc') {
+      return sorted.sort((a, b) => b.availability - a.availability);
+    }
+
+    return sorted;
+  };  
   const navigate = useNavigate();
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   
   useEffect(() => {
     const preloadImages = async () => {
@@ -29,6 +88,14 @@ const PackagesPage = () => {
     };
     preloadImages();
   }, [data]);
+  useEffect(() => {
+    if (data?.getPackages) {
+      let filteredData = filterPackages(data.getPackages);
+      filteredData = sortPackages(filteredData);
+      setFilteredPackages(filteredData);
+    }
+  }, [data, filter, sort, searchQuery]);
+  
   useEffect(() => {
     if (!loading) {
       const timeout = setTimeout(() => {
@@ -58,7 +125,15 @@ const PackagesPage = () => {
       console.error(`Error fetching Unsplash image for ${destination}:`, error);
     }
   };
-
+  const handleBudgetChange = (e) => {
+    setFilter((prev) => ({ ...prev, budget: e.target.value }));
+  };
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+  };
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
   const handleBookNow = (pkg) => {
     navigate("/confirm-booking", { state: { packageDetails: pkg } }); 
   };
@@ -80,12 +155,48 @@ const PackagesPage = () => {
           <div className="right-banner">Flat 50% off!</div>
         </div>
         <Content>
-          <Heading>Available Travel Packages</Heading>
+          <SubHeading>Travel with us and explore the world &#9992;</SubHeading>
+          <Heading>Available Travel Packages </Heading> {/* Search Box */}
+          <SearchBox
+            type="text"
+            placeholder="Search by package name or destination"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <div className="filters">
+            <div className="budgetdiv">
+            <label htmlFor="budget">Budget: </label>
+  <input
+    type="range"
+    id="budget"
+    name="budget"
+    min="0"
+    max="500000" // Assuming a max budget of 20000
+    step="1000" // Adjust the step as per your needs
+    value={filter.budget}
+    onChange={handleBudgetChange}
+  />
+  <span>₹{filter.budget}</span>
+            </div>
+           {/* Display the current value of the budget */}
+
+ <div>
+ <label htmlFor="sort">Sort by: </label>
+  <select name="sort" id="sort" onChange={handleSortChange}>
+    <option value="priceAsc">Price (Low to High)</option>
+    <option value="priceDesc">Price (High to Low)</option>
+    <option value="availabilityDesc">Availability (Most to Least)</option>
+   <option value="availabilityAsc">Availability (Least to Most)</option>
+  </select>
+ </div>
+</div>
+
           <PackagesContainer>
-            {data.getPackages.map((pkg) => (
+            {filteredPackages.map((pkg) => (
               <PackageCard
                 key={pkg.id}
-                backgroundimage={images[pkg.destination] || 'images/loader.svg'}
+                backgroundimage={images[pkg.destination] || 'images/loader.svg'} 
+                onClick={() => navigate(`/package-details/${pkg.id}`, { state: pkg })}
               >
                 <CardContent>
                   <PackageTitle>{pkg.title}</PackageTitle>
@@ -94,7 +205,7 @@ const PackagesPage = () => {
                     <Detail>{pkg.duration} itinerary</Detail>
                     <Detail>
                       <strong>Available:</strong>{' '}
-                      {pkg.availability < 10 ? (
+                      {(pkg.availability <= 10 && pkg.availability>=1) ? (
                         <span className="blinking-text">{pkg.availability} (Few left)</span>
                       ) : (
                         pkg.availability
@@ -121,17 +232,31 @@ const PackagesPage = () => {
 
 export default PackagesPage;
 
+const SearchBox = styled.input`
+  font-size: 1rem;
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+`;
+const SubHeading = styled.h2`
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color:teal;
+`;
 const PageContainer = styled.div`
   padding: 60px 20px;
   max-width: 1200px;
   margin: 0 auto;
 `;
 const Heading = styled.h1`
-  font-size: 2.5rem;
-  color: teal;
-  font-weight: bold;
-  margin-bottom: 40px;
-  text-align: center;
+  font-size: 2rem;
+  color:#212529;
+  font-weight:bolder;
+  margin-bottom: 30px;
+  text-align: left;
 `;
 
 const PackagesContainer = styled.div`
@@ -142,14 +267,15 @@ const PackagesContainer = styled.div`
 `;
 const PackageCard = styled.div`
   background: linear-gradient(-90deg,
-    rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.47),
+    rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.61),
     rgba(0, 0, 0, 0.79) 
   ), url(${(props) => props.backgroundimage});
   background-size: cover;
   background-position: center;
   border-radius: 10px;
   overflow: hidden;
-  width: 40%;
+  width: 49%;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -169,7 +295,43 @@ const CardContent = styled.div`
 `;
 
 const Content = styled.div`
-padding-bottom:40px;`;
+padding-bottom:40px;
+.filters{
+display:flex;
+padding:20px;
+flex-wrap:wrap;
+flex-direction:row;
+justify-content:space-between;}
+label{
+  color:teal;
+  font-weight:bold;
+}
+input[type="range"]{
+width:100%;
+}
+span{
+  color:grey;
+  font-weight:bold;
+}
+  span.blinking-text {
+  color:red;}
+ select{
+ width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid teal;
+  
+ }
+  option{
+  color:teal;
+  background:white;
+  font-weight:bold;
+}
+  option:hover{
+  background:teal;
+  color:white;
+}
+`;
 const PackageTitle = styled.h2`
   font-size: 1.5rem;
   color: white;

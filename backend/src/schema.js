@@ -20,6 +20,13 @@ module.exports = gql`
         bookings: [Booking]
     }
 
+type UserWithBookingCount {
+    id: ID!
+    username: String!
+    email: String!
+    bookingCount: Int!
+}
+
     type Booking {
         id: ID!
         user: User!
@@ -30,13 +37,16 @@ module.exports = gql`
 
     type Query {
         getPackages: [TravelPackage!]
+        getUsersWithBookingCounts: [UserWithBookingCount!]
         getBookingHistory(userId: ID!): [Booking!]
     }
 
     type Mutation {
+        updateBookingStatus(bookingId: ID!, status: String!): Booking
         registerUser(username: String!, email: String!, password: String!, role: String): User
         loginUser(email: String!, password: String!): String
-        bookPackage(packageId: ID!, userId: ID!, date: String!): Booking
+        bookPackage(packageId: ID!, userId: ID!, date: String!,status:String!): Booking
+        deleteTravelPackage(id:ID!):TravelPackage
         addTravelPackage(title: String!, description: String!, price: Float!, duration: String!, destination: String!, availability: Int!): TravelPackage
          updateTravelPackage(
       id: ID!

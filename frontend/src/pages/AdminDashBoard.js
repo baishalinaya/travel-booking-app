@@ -1,18 +1,22 @@
 import React, { useState,useEffect } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_PACKAGES } from '../graphql/queries';
+import { GET_USERS_WITH_BOOKING_COUNTS,GET_PACKAGES } from '../graphql/queries';
 import styled from 'styled-components';
 import NavBar from './NavBar';
 import Footer from './Footer';
 import AddPackageForm from './AddPackageForm';
+import { useNavigate } from "react-router-dom";
 import EditPackageList from './EditPackageList';
 
 const AdminDashboard = () => {
+  const { data: userData, loading: userLoading } = useQuery(GET_USERS_WITH_BOOKING_COUNTS);
   const { data: packageData, loading: packageLoading } = useQuery(GET_PACKAGES);
  useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top when the component is mounted
   }, []);
-  const [activeForm, setActiveForm] = useState(null); // Track which form is active
+  const navigate = useNavigate();
+  const [activeForm, setActiveForm] = useState(null);
+  const [isUserListVisible, setIsUserListVisible] = useState(false); // State to control user list visibility
 
   const totalPackages = packageData?.getPackages.length || 0;
 
@@ -23,17 +27,28 @@ const AdminDashboard = () => {
       setActiveForm(formType); // Open the selected form
     }
   };
+  const toggleUserList = () => {
+    setIsUserListVisible((prev) => !prev); // Toggle the visibility of the user list
+  };
+  const navigateToBookingHistory = (userId,username) => {
+    localStorage.setItem('selected-username', username);
+    navigate( `/booking-history/${userId}`);
+  };
 
   return (
     <div>
       <NavBar />
       <DashboardContainer>
-        <Heading>Admin Dashboard</Heading>
+        <Heading>Admin Dashboard &#9992;</Heading>
         <CardsContainer>
           {/* Users Card */}
-          <Card>
-            <CardTitle>Users</CardTitle>
-            <CardValue>1.3B</CardValue> {/* Hardcoded user count for now */}
+          <Card onClick={toggleUserList}>
+            <CardTitle>Total Users</CardTitle>
+            {userLoading ? (
+              <CardValue>Loading...</CardValue>
+            ) : (
+              <CardValue>{userData?.getUsersWithBookingCounts.length}</CardValue>
+            )}
           </Card>
 
           <Card onClick={() => toggleForm('add')}>
@@ -42,7 +57,7 @@ const AdminDashboard = () => {
           </Card>
 
           <Card onClick={() => toggleForm('edit')}>
-            <CardTitle>Edit Packages</CardTitle>
+            <CardTitle>Packages</CardTitle>
             {packageLoading ? (
               <CardValue>Loading...</CardValue>
             ) : (
@@ -50,7 +65,18 @@ const AdminDashboard = () => {
             )}
           </Card>
         </CardsContainer>
-
+        {isUserListVisible && (
+          <UserListContainer>
+            <UserHeading>Users and Booking Counts</UserHeading>
+            {userData?.getUsersWithBookingCounts.map((user) => (
+              <UserCard key={user.id} onClick={() => navigateToBookingHistory(user.id, user.username)}>
+                <UserTitle>{user.username}</UserTitle>
+                <UserEmail>{user.email}</UserEmail>
+                <UserBookings>{user.bookingCount} bookings</UserBookings>
+              </UserCard>
+            ))}
+          </UserListContainer>
+        )}
         {/* Conditionally Render Forms */}
         {activeForm === 'add' && (
           <FormContainer>
@@ -72,6 +98,51 @@ const AdminDashboard = () => {
 export default AdminDashboard;
 
 // Styled Components
+
+const UserListContainer = styled.div`
+  margin-top: 40px;
+`;
+
+const UserHeading = styled.h2`
+  font-size: 2rem;
+  color: teal;
+  margin-bottom: 20px;
+`;
+
+const UserCard = styled.div`
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+  }
+`;
+
+const UserTitle = styled.h3`
+  font-size: 1.5rem;
+  color: teal;
+`;
+
+const UserEmail = styled.p`
+  font-size: 1rem;
+  color: #555;
+  padding:20px;
+`;
+
+const UserBookings = styled.p`
+  font-size: 1.2rem;
+  color: rgb(0, 187, 31);
+  padding:20px;
+`;
 const DashboardContainer = styled.div`
   padding: 40px;
   padding-top: 100px;

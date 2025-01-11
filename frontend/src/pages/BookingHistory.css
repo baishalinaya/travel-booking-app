@@ -7,10 +7,19 @@
     padding-top: 80px;
     min-height: 100vh; /* Ensure the background covers the entire viewport */
   }
-  
-  .booking-history h1 {
+   .booking-history h3{
     color: teal;
-    font-size: 40px;
+    text-align: left;
+    padding-left: 47px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+   }
+  .booking-history h1 {
+    color: #212529;
+    font-size: 2rem;
+    padding-left: 45px;
+    text-align: left;
     margin-bottom: 30px;
   }
  .bookings-list{
@@ -26,12 +35,39 @@
     padding: 30px;
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
+    cursor: pointer;
     flex-direction: column;
     justify-content: space-between;
     margin-bottom: 20px;
     text-align: left;
   }
-  
+  .booking-history-options{
+    display: flex;
+    justify-content: space-between;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  .booking-history-options label{
+    font-weight: 600;
+  }
+  .filter-container{
+    color:teal;
+    margin-bottom: 20px;
+  }
+  .filter-container select{
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid teal;
+  }
+  .sort-container{
+    margin-bottom: 20px;
+    color:teal;
+  }
+  .sort-container select{
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid teal;
+  }
   .booking-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
@@ -55,11 +91,11 @@
     color: #29626b;
   }
   #start{
-    color: white;
+    color: rgb(21, 59, 82);
     font-size: 30px;
   }
   #message{
-    color: white;
+    color: teal;
     font-size: 20px;
   }
   #start:hover{

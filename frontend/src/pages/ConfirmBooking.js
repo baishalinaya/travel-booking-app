@@ -5,14 +5,18 @@ import styled from "styled-components";
 import { BOOK_PACKAGE } from "../graphql/mutation"; // Import the GraphQL mutation
 import NavBar from "./NavBar";
 import Footer from "./Footer";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ConfirmBooking = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
  useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top when the component is mounted
   }, []);
-  const [bookPackage] = useMutation(BOOK_PACKAGE); // Apollo mutation hook
+  const [bookPackage] = useMutation(BOOK_PACKAGE);
 
   const [formData, setFormData] = useState({
     name: localStorage.getItem("username") || "",
@@ -22,18 +26,72 @@ const ConfirmBooking = () => {
 
   const additionalCharges = 200; 
   const totalPrice = state.packageDetails.price + additionalCharges;
+  const toastOptions = {
+    position: "bottom-right",
+    autoClose: 3000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "dark",
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  const handleSubmit = async (e) => {
+  const handleCheckboxChange = (e) => {
+    setTermsAccepted(e.target.checked);
+  };
+  const handlePayLater = async (e) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast.error("You must accept the terms and conditions to proceed.", toastOptions);
+      return;
+    }
     const userId = localStorage.getItem("user-id");
     if (!userId) {
-      alert("You must be logged in to confirm booking.");
+      toast.error("You must be logged in to confirm booking.", toastOptions);
       navigate("/auth");
+      return;
+    }
+  
+    try {
+      // Call the BOOK_PACKAGE mutation with "Pending" status
+      const { data } = await bookPackage({
+        variables: {
+          packageId: state.packageDetails.id, // Package ID from state
+          userId,
+          date: formData.date,
+          status: "Pending", // Set status as "Pending"
+        },
+      });
+  
+      if (data?.bookPackage) {
+        toast.success(`Your booking for ${state.packageDetails.title} has been saved as pending.`, toastOptions);
+        setTimeout(() => {
+        navigate(`/booking-history/${userId}`)}, 3000
+        );
+      } else {
+        toast.error("Failed to save booking. Please try again.", toastOptions);
+      }
+    } catch (err) {
+      console.error("Error saving booking:", err);
+      toast.error("An error occurred while saving the booking.", toastOptions);
+    }
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!termsAccepted) {
+      toast.error("You must accept the terms and conditions to proceed.", toastOptions);
+      return;
+    }
+
+    const userId = localStorage.getItem("user-id");
+    if (!userId) {
+      toast.error("You must be logged in to confirm booking.", toastOptions);
+      setTimeout(() => {
+        navigate("/auth");
+        }, 3000);
       return;
     }
 
@@ -44,18 +102,20 @@ const ConfirmBooking = () => {
           packageId: state.packageDetails.id, // Package ID from state
           userId,
           date: formData.date,
+          status:"Confirmed",
         },
       });
 
       if (data?.bookPackage) {
-        alert(`Booking confirmed for "${state.packageDetails.title}"!`);
-        navigate("/booking-history");
-      } else {
-        alert("Failed to confirm booking. Please try again.");
+        toast.success(`Booking confirmed for ${state.packageDetails.title}!`, toastOptions);
+        setTimeout(() => {
+          navigate(`/booking-history/${userId}`);
+        }, 3000);  } else {
+        toast.error("Failed to confirm booking. Please try again.", toastOptions);
       }
     } catch (err) {
       console.error("Error confirming booking:", err);
-      alert("An error occurred while confirming the booking.");
+      toast.error("An error occurred while confirming the booking.", toastOptions);
     }
   };
 
@@ -121,7 +181,7 @@ const ConfirmBooking = () => {
 
           {/* Terms and Conditions */}
           <Terms>
-            <input type="checkbox" required /> I agree to the{" "}
+            <input type="checkbox" onChange={handleCheckboxChange} /> I agree to the{" "}
             <a href="/terms" target="_blank" rel="noopener noreferrer">
               terms and conditions
             </a>{" "}
@@ -129,9 +189,10 @@ const ConfirmBooking = () => {
           </Terms>
 
           <button type="submit">Pay ₹{totalPrice} and Confirm Booking</button>
-          <button id="later"> Pay Later</button>
+          <button id="later" onClick={handlePayLater}> Pay Later</button>
         </Form>
       </Container>
+      <ToastContainer/>
       <Footer />
     </div>
   );

@@ -12,11 +12,11 @@ const BookingContent = () => {
   };
 
   const handleUserCart = () => {
-    navigate('/booking-history');
+    navigate(`/booking-history/${localStorage.getItem('user-id')}`);
   };
   return (
     <ContentContainer>
-      <SectionHeading>Seamless Travel Booking</SectionHeading>
+      <SectionHeading>Seamless Travel Booking &#9992;</SectionHeading>
       <MainHeading>Effortlessly browse and manage trips</MainHeading>
       <CardsContainer>
         <Card onClick={handleAllPackages}>
@@ -45,7 +45,7 @@ const BookingContent = () => {
       <JourneySection>
         <JourneyImage src={journeyImage} alt="Your Journey Simplified" />
         <JourneyText>
-          <JourneyHeading>Your Journey, Simplified</JourneyHeading>
+          <JourneyHeading>Your Journey, Simplified &#9992;</JourneyHeading>
           <JourneySubHeading>
             Experience seamless travel booking with us
           </JourneySubHeading>

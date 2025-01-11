@@ -85,7 +85,7 @@ function HomePage() {
             </Content>
             <MainContent>
               <TextSection>
-                <SmallHeading>Explore With Ease</SmallHeading>
+                <SmallHeading>Explore With Ease &#9992;</SmallHeading>
                 <ContentHeading>Your journey starts here</ContentHeading>
                 <ExtendedDescription>
                 Discover a world of convenience and endless possibilities with
@@ -93,12 +93,7 @@ function HomePage() {
                 memorable journeys. Whether you're planning a quick weekend
                 getaway to recharge, a much-anticipated family vacation filled
                 with fun and bonding, or a seamless business trip to keep you
-                ahead of your schedule, we've got you covered. Our platform is
-                designed to take the stress out of planning, offering you a
-                hassle-free experience that allows you to focus on what truly
-                matters – enjoying the journey and the destination. Let us take
-                care of the details while you embrace the joy of exploring the
-                world. 
+                ahead of your schedule, we've got you covered.
                 </ExtendedDescription>
                 <ContactLink onClick={handleScrollToContact}>Get in touch</ContactLink>
               </TextSection>
@@ -107,7 +102,7 @@ function HomePage() {
               </ImageSection>
             </MainContent>
             <PackagesSection>
-              <Heading>Explore Travel Packages</Heading>
+              <Heading>Explore Travel Packages &#9992;</Heading>
               <SubHeading>Browse and book your perfect getaway.</SubHeading>
               <CardContainer>
                 <Card onClick={handleTravelPackageBrowsing}>
@@ -161,11 +156,11 @@ function HomePage() {
                  <CardDescription>{pkg.description}</CardDescription>
                   <CardDescription id="price"><strike>₹{pkg.price+(pkg.price*0.50)}</strike> ₹{pkg.price} </CardDescription>
                   <CardDescription>{pkg.duration} itenary</CardDescription>
-                  <BookButton onClick={() => handleBookNow(pkg)}>Book Now</BookButton>
+                  <BookButton onClick={() => handleBookNow(pkg)}>Book Now &#9992;</BookButton>
                 </CardContent>
               </Card>
             ))}
-            <Card onClick={showmore}><CardContent><p id="explore">Explore More ➤</p></CardContent></Card>
+            <Card onClick={showmore}><CardContent><CardTitle id="explore">Explore More &#9992;</CardTitle></CardContent></Card>
           </PackageCardContainer>
         </LatestPackagesSection>
 
@@ -203,7 +198,7 @@ function HomePage() {
               </Form>
             </FormWrapper>
             <ContactInfo>
-              <InfoHeading>Contact us</InfoHeading>
+              <InfoHeading>Contact us &#9992;</InfoHeading>
               <InfoItem>📧 support@tripify.com</InfoItem>
               <InfoItem>📍 123 Travel Lane, Wanderlust City</InfoItem>
               <InfoHours>
@@ -257,9 +252,11 @@ const PackageImage = styled.img`
   object-fit: cover;
 `;
 const SectionHeading = styled.h2`
-  font-size: 2rem;
-  color:teal;
-  margin-bottom: 30px;
+   font-size: 2rem;
+  color:rgb(26, 79, 92);
+  font-weight: 600;
+  margin-bottom: 20px;
+ 
 `;
 const BookButton = styled.button`
   background: teal;
@@ -352,6 +349,7 @@ const FormWrapper = styled.div`
   max-width: 700px;
   padding: 20px;
   border-radius: 10px;
+  background-color: white;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 `;
 
@@ -364,7 +362,7 @@ const ContactHeading = styled.h3`
 
 const FormSubHeading = styled.h2`
   font-size: 2rem;
-  color: #212529;
+  color: rgb(26, 79, 92);
   font-weight: 600;
   margin-bottom: 20px;
 `;
@@ -485,7 +483,8 @@ const Container = styled.div`
   align-items: center;
   min-height: 100vh;
   padding-top:70px;
-  background:#f0f8ff;
+  background-size:contain;
+  background-repeat:no-repeat;
 `;
 
 const Content = styled.div`
@@ -616,6 +615,7 @@ const ImageSection = styled.div`
 
 const StyledImage = styled.img`
   width: 508px;
+  position:relative;
   height: 338px;
   border-radius: 8px;
 `;
@@ -666,10 +666,11 @@ const Card = styled.div`
   &:hover {
     transform: translateY(-10px);
     box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
-
     h3 {
-      color:yellow;
+      color:rgb(0, 44, 62);
     }
+      #explore{
+      color:yellow;}
   }
 `;
 
@@ -696,6 +697,7 @@ const CardTitle = styled.h3`
   font-weight: bold;
   margin-bottom: 10px;
   transition: color 0.3s ease;
+
 `;
 
 const CardDescription = styled.p`

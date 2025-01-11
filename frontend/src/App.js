@@ -14,7 +14,10 @@ import Booking from './pages/Booking';
 import AdminDashboard from './pages/AdminDashBoard';
 import SecureContent from './components/SecureContent';
 import UpdateContent from './components/UpdateContent';
+import PaymentForm from './pages/PaymentForm';
 import AboutUs from './pages/AboutUs';
+import BookingDetails from './pages/BookingDetails';
+import PackageDetails from './pages/PackageDetails';
 const App = () => {
   return (
     <ApolloWrapper>
@@ -26,16 +29,18 @@ const App = () => {
           <Route path="/packages" element={<PackagesPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/booking" element={<Booking/>}/>
-          <Route path="/booking-history" element={<BookingHistory />} />
           <Route path="/admin" element={<AdminDashboard/>}/>
           <Route path="/confirm-booking" element={<ConfirmBooking />} />
           <Route path="/secure" element={<SecureContent/>}/>
           <Route path="/update" element={<UpdateContent/>}/>
-          <Route path="/aboutus" element={<AboutUs/>}></Route>
+          <Route path="/payment" element={<PaymentForm />} />
+          <Route path="/aboutus" element={<AboutUs/>}/>
+          <Route path="/booking-details/:id" element={<BookingDetails />} />
+          <Route path="/booking-history/:userId" element={<BookingHistory />} />
+          <Route path="/package-details/:id" element={<PackageDetails />} />
 
                   </Routes>
         </AppContainer>
-       
       </Router> 
     
     </ApolloWrapper>

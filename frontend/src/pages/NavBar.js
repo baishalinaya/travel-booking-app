@@ -37,6 +37,7 @@ const NavBar = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
     localStorage.removeItem("role");
+    localStorage.removeItem("selected-username"); 
     setIsLoggedIn(false);
     setUserId(null);
     setUsername(null);
@@ -59,12 +60,13 @@ const NavBar = () => {
         <Link to="/" className="nav-link">
           Home
         </Link>
-        <Link to="/aboutus" className="nav-link">
-          About Us
-        </Link>
         <Link to="/packages" className="nav-link">
           Explore
         </Link>
+        <Link to="/aboutus" className="nav-link">
+          About Us
+        </Link>
+       
         {isLoggedIn ? (
           <div className="dropdown">
             <span className="nav-link dropdown-toggle" onClick={toggleDropdown}>
@@ -73,7 +75,9 @@ const NavBar = () => {
             
             {showDropdown && (
               <div className="dropdown-menu">
-                <Link to="/booking-history" className="dropdown-item">
+                <Link to={`/booking-history/${userId}`} className="dropdown-item" onClick={()=>{localStorage.setItem('selected-username', username);
+                  navigate(`/booking-history/${userId}`);
+                }}>
                   Booking History
                 </Link>
                 {role === "admin" && (

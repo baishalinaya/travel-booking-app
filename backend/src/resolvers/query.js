@@ -9,7 +9,15 @@ module.exports=
           throw new Error('Unable to fetch travel packages');
         }
       },
-  
+      getUsersWithBookingCounts: async (_, __, { models }) => {
+        const users = await models.User.find().populate('bookings');
+        return users.map((user) => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          bookingCount: user.bookings.length,
+        }));
+      },
       // Fetch booking history for a specific user
       getBookingHistory: async (_, { userId }, { models, user }) => {
         if (!user) {
@@ -21,8 +29,11 @@ module.exports=
         }
   
         try {
-          const bookings = await models.Booking.find({ user: userId }).populate('package');
-          return bookings;
+          const bookings = await models.Booking.find({ user: userId })
+      .populate('package')
+      .then(bookings => bookings.filter(booking => booking.package != null)); 
+
+    return bookings;
         } catch (err) {
           console.error('Error fetching booking history:', err);
           throw new Error('Unable to fetch booking history');
